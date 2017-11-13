@@ -1,10 +1,14 @@
 package com.github.hesimin.rpc.provider;
 
 import com.github.hesimin.rpc.common.RpcRequest;
+import com.github.hesimin.rpc.common.RpcResponse;
+import com.github.hesimin.rpc.provider.scan.ClassScan;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -17,21 +21,36 @@ public class InvokerHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         RpcRequest request = (RpcRequest) msg;
-        Object clazz = classMap.get(request.getClassName());
-        if (clazz == null) {
+        RpcResponse response = new RpcResponse();
+        response.setMessageId(request.getMessageId());
+
+        List<Object> clazzs = null;//classMap.get(request.getClassName());
+        if (clazzs == null) {
             try {
-                clazz = Class.forName(request.getClassName()).newInstance();
-                classMap.put(request.getClassName(), clazz);
-            } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+                clazzs = ClassScan.getBean(request.getClassName());
+//                classMap.put(request.getClassName(), clazzs);
+            } catch (ClassNotFoundException e) {
                 e.printStackTrace();
-                writeAndClose(ctx, "Not found Class: " + request.getClassName());
+                response.setSuccess(false);
+                response.setError(e);
+                writeAndClose(ctx, response);
                 return;
             }
         }
 
+        Object clazz = clazzs.get(0);
         Method method = clazz.getClass().getMethod(request.getMethodName(), request.getParameterTypes());
-        Object result = method.invoke(clazz, request.getParameters());
-        writeAndClose(ctx, result);
+
+        Object result = null;
+        try {
+            result = method.invoke(clazz, request.getParameters());
+            response.setSuccess(true);
+            response.setReponse(result);
+        } catch (Throwable e) {
+            response.setSuccess(false);
+            response.setError(e);
+        }
+        writeAndClose(ctx, response);
     }
 
     private void writeAndClose(ChannelHandlerContext ctx, Object result) {

@@ -43,6 +43,7 @@ public class RpcServer {
 
         try {
             ChannelFuture future = serverBootstrap.bind(port).sync();
+            System.out.println("start server port = [" + port + "]...");
             future.channel().closeFuture().sync();
         } catch (Exception e) {
             boss.shutdownGracefully();
@@ -50,4 +51,6 @@ public class RpcServer {
             e.printStackTrace();
         }
     }
+
+
 }

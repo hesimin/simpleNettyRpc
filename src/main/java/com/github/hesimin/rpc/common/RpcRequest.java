@@ -1,13 +1,24 @@
 package com.github.hesimin.rpc.common;
 
+import java.io.Serializable;
+
 /**
  * @author hesimin 2017-11-12
  */
-public class RpcRequest {
-    private String className;
-    private String methodName;
-    private Class[] parameterTypes;
+public class RpcRequest implements Serializable {
+    private String   messageId;
+    private String   className;
+    private String   methodName;
+    private Class[]  parameterTypes;
     private Object[] parameters;
+
+    public String getMessageId() {
+        return messageId;
+    }
+
+    public void setMessageId(String messageId) {
+        this.messageId = messageId;
+    }
 
     public String getClassName() {
         return className;
