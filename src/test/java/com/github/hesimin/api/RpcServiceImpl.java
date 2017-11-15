@@ -5,7 +5,10 @@ package com.github.hesimin.api;
  */
 public class RpcServiceImpl implements RpcService {
     @Override
-    public String say(String name) {
+    public String say(String name,boolean createException) {
+        if(createException){
+            throw new RuntimeException("创建异常");
+        }
         return "hello " + name;
     }
 }

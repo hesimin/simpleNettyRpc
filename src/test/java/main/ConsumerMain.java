@@ -12,7 +12,7 @@ public class ConsumerMain {
         RpcService rpcService = new RpcServiceImpl();
         rpcService = RpcProxyFactory.proxyBean(rpcService);
 
-        String result = rpcService.say("rpc test.");
+        String result = rpcService.say("rpc test.",true);
         System.out.println("请求结果：" + result);
     }
 }

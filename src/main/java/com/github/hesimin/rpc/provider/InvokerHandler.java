@@ -48,7 +48,13 @@ public class InvokerHandler extends ChannelInboundHandlerAdapter {
             response.setReponse(result);
         } catch (Throwable e) {
             response.setSuccess(false);
-            response.setError(e);
+            if(e instanceof  InvocationTargetException){
+                InvocationTargetException te = (InvocationTargetException) e;
+                response.setError(te.getTargetException());
+            }else{
+                response.setError(e);
+            }
+            System.out.println("调用业务发生了异常：" + response.getError().getMessage());
         }
         writeAndClose(ctx, response);
     }
